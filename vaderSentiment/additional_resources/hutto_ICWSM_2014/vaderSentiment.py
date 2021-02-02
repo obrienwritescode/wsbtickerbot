@@ -17,10 +17,9 @@ For example:
 '''
 
 import math, re, sys, fnmatch, string
-reload(sys)
 
 f = 'vader_sentiment_lexicon.txt' # empirically derived valence ratings for words, emoticons, slang, swear words, acronyms/initialisms
-word_valence_dict = dict(map(lambda (w, m): (w, float(m)), [
+word_valence_dict = dict(map(lambda w__m: (w__m[0], float(w__m[1])), [
             wmsr.strip().split('\t')[0:2] for wmsr in open(f) ]))
 
 # for removing punctuation
@@ -350,8 +349,8 @@ if __name__ == '__main__':
                         ]
     sentences.extend(tricky_sentences)
     for sentence in sentences:
-        print sentence,
+        print(sentence)
         ss = sentiment(sentence)
-        print "\t" + str(ss)
+        print("\t" + str(ss))
     
-    print "\n\n Done!"
+    print ("\n\n Done!")

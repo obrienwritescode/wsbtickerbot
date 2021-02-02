@@ -1,0 +1,11 @@
+{
+    "login":{
+        "client_id":"redditClientId",
+        "client_secret":"redditAppSecret",
+        "username":"yourRedditUsername",
+        "password":"yourRedditPassword",
+        "user_agent":"local runner"        
+    },
+    "iex_apikey": "iexApiKey",
+    "DestinationUsername":"RedditUserToSendMessageTo"
+}

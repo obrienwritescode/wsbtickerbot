@@ -7,11 +7,13 @@ import pprint
 import operator
 import datetime
 from praw.models import MoreComments
-from iexfinance import Stock as IEXStock
+from iexfinance.stocks import Stock
 
 # to add the path for Python to search for files to use my edited version of vaderSentiment
 sys.path.insert(0, 'vaderSentiment/vaderSentiment')
 from vaderSentiment import SentimentIntensityAnalyzer
+
+outputs = []
 
 def extract_ticker(body, start_index):
    """
@@ -58,7 +60,7 @@ def parse_section(ticker_dict, body):
          try:
             # special case for $ROPE
             if word != "ROPE":
-               price = IEXStock(word).get_price()
+               price = Stock(word, token=data["iex_apikey"]).get_price()
                if word in ticker_dict:
                   ticker_dict[word].count += 1
                   ticker_dict[word].bodies.append(body)
@@ -79,8 +81,9 @@ def parse_section(ticker_dict, body):
          try:
             # special case for $ROPE
             if word != "ROPE":
-               price = IEXStock(word).get_price()
+               price = Stock(word, token=data["iex_apikey"])
          except:
+            #print("Unexpected error:", sys.exc_info()[0])
             continue
       
          # add/adjust value of dictionary
@@ -123,10 +126,12 @@ def setup(sub):
    if sub == "":
       sub = "wallstreetbets"
 
+   global data
    with open("config.json") as json_data_file:
       data = json.load(json_data_file)
 
    # create a reddit instance
+   global reddit
    reddit = praw.Reddit(client_id=data["login"]["client_id"], client_secret=data["login"]["client_secret"],
                         username=data["login"]["username"], password=data["login"]["password"],
                         user_agent=data["login"]["user_agent"])
@@ -151,7 +156,7 @@ def run(mode, sub, num_submissions):
          ticker_dict = parse_section(ticker_dict, post.title)
 
          # to determine whether it has gone through all posts in the past 24 hours
-         if "Daily Discussion Thread - " in post.title:
+         if "Daily Discussion Thread" in post.title:
             if not within24_hrs:
                within24_hrs = True
             else:
@@ -178,7 +183,7 @@ def run(mode, sub, num_submissions):
          sys.stdout.write("\rProgress: {0} / {1} posts".format(count + 1, num_submissions))
          sys.stdout.flush()
 
-   text = "To help you YOLO your money away, here are all of the tickers mentioned at least 10 times in all the posts within the past 24 hours (and links to their Yahoo Finance page) along with a sentiment analysis percentage:"
+   text = "\n\n\nTop mentions for r\\" + sub
    text += "\n\nTicker | Mentions | Bullish (%) | Neutral (%) | Bearish (%)\n:- | :- | :- | :- | :-"
 
    total_mentions = 0
@@ -187,6 +192,10 @@ def run(mode, sub, num_submissions):
       # print(key, ticker_dict[key].count)
       total_mentions += ticker_dict[key].count
       ticker_list.append(ticker_dict[key])
+
+   for key in ticker_dict:
+      if ticker_dict[key].count < 10:
+         ticker_list.remove(ticker_dict[key])
 
    ticker_list = sorted(ticker_list, key=operator.attrgetter("count"), reverse=True)
 
@@ -202,20 +211,20 @@ def run(mode, sub, num_submissions):
       # setting up formatting for table
       text += "\n{} | {} | {} | {}".format(url, ticker.bullish, ticker.bearish, ticker.neutral)
 
-   text += "\n\nTake a look at my [source code](https://github.com/RyanElliott10/wsbtickerbot) and make some contributions if you're interested."
-
    # post to the subreddit if it is in bot mode (i.e. not testing)
-   if not mode:
-      final_post(subreddit, text)
-   # testing
-   else:
-      print("\nNot posting to reddit because you're in test mode\n\n*************************************************\n")
-      print(text)
+   # if not mode:
+   #    final_post(subreddit, text)
+   # # testing
+   # else:
+   #    print("\nNot posting to reddit because you're in test mode\n\n*************************************************\n")
+
+   outputs.append(text)
+   print(text)
 
 class Ticker:
    def __init__(self, ticker):
       self.ticker = ticker
-      self.count = 0
+      self.count = 0 
       self.bodies = []
       self.pos_count = 0
       self.neg_count = 0
@@ -241,13 +250,27 @@ class Ticker:
       self.neutral = int(neutral_count / len(self.bodies) * 100)
 
 if __name__ == "__main__":
-   # USAGE: wsbtickerbot.py [ subreddit ] [ num_submissions ]
    mode = 0
-   num_submissions = 500
-   sub = "wallstreetbets"
+   num_submissions = 200
 
    if len(sys.argv) > 2:
       mode = 1
       num_submissions = int(sys.argv[2])
 
-   run(mode, sub, num_submissions)
+   run(mode, "wallstreetbets", num_submissions)
+
+   run(mode, "stocks", num_submissions)
+
+   run(mode, "investing", num_submissions)
+
+   buildMessage = "Here are all of the tickers mentioned at least 10 times in all the posts within the past 24 hours (and links to their Yahoo Finance page) along with a sentiment analysis percentage:"
+   for output in outputs:
+      buildMessage += output + "\n\n\n\n"
+
+   
+   buildMessage += "\n\n[Source Code](https://github.com/obrienwritescode/RedditMentionedStocks)"
+
+
+   reddit.redditor(data["DestinationUsername"]).message(str(get_date()) + " | Today's Top 25 Tickers", buildMessage)
+
+       
