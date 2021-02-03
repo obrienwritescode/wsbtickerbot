@@ -8,6 +8,7 @@ import operator
 import datetime
 from praw.models import MoreComments
 from iexfinance.stocks import Stock
+import os
 
 # to add the path for Python to search for files to use my edited version of vaderSentiment
 sys.path.insert(0, 'vaderSentiment/vaderSentiment')
@@ -129,6 +130,15 @@ def setup(sub):
    global data
    with open("config.json") as json_data_file:
       data = json.load(json_data_file)
+      if data["login"]["client_id"] == '':
+             data["login"]["client_id"] = os.getenv('CLIENT_ID')
+             data["login"]["client_secret"] = os.getenv('CLIENT_SECRET')
+             data["login"]["username"] = os.getenv('USERNAME')
+             data["login"]["password"] = os.getenv('PASSWORD')
+             data["login"]["user_agent"] = os.getenv('USER_AGENT')
+             data["iex_apikey"] = os.getenv('IEX_APIKEY')
+
+          
 
    # create a reddit instance
    global reddit
@@ -270,7 +280,7 @@ if __name__ == "__main__":
    
    buildMessage += "\n\n[Source Code](https://github.com/obrienwritescode/RedditMentionedStocks)"
 
-
-   reddit.redditor(data["DestinationUsername"]).message(str(get_date()) + " | Today's Top 25 Tickers", buildMessage)
+   for toUser in data["SendLIst"]:
+         reddit.redditor(toUser).message(str(get_date()) + " | Today's Top 25 Tickers", buildMessage)
 
        
