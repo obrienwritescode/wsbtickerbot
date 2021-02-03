@@ -1,8 +1,8 @@
 name: RunRedditBot
 
-on: workflow_dispatch
-#   schedule:
-#   - cron: "0 19 * * 1-5"
+on: 
+  schedule:
+  - cron: "0 19 * * 1-5"
 
 jobs:
   build:
