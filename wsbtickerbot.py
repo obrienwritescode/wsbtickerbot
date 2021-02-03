@@ -258,7 +258,7 @@ if __name__ == "__main__":
    print(str(sys.argv[1]))
 
    if len(sys.argv) > 1:
-      data = json.load(str(sys.argv[1]))
+      data = json.loads(str(sys.argv[1]))
 
    run(mode, "wallstreetbets", num_submissions)
 
