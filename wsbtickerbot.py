@@ -127,19 +127,6 @@ def setup(sub):
    if sub == "":
       sub = "wallstreetbets"
 
-   global data
-   with open("config.json") as json_data_file:
-      data = json.load(json_data_file)
-      if data["login"]["client_id"] == '':
-             data["login"]["client_id"] = os.getenv('CLIENT_ID')
-             data["login"]["client_secret"] = os.getenv('CLIENT_SECRET')
-             data["login"]["username"] = os.getenv('USERNAME')
-             data["login"]["password"] = os.getenv('PASSWORD')
-             data["login"]["user_agent"] = os.getenv('USER_AGENT')
-             data["iex_apikey"] = os.getenv('IEX_APIKEY')
-
-          
-
    # create a reddit instance
    global reddit
    reddit = praw.Reddit(client_id=data["login"]["client_id"], client_secret=data["login"]["client_secret"],
@@ -263,9 +250,13 @@ if __name__ == "__main__":
    mode = 0
    num_submissions = 200
 
-   if len(sys.argv) > 2:
-      mode = 1
-      num_submissions = int(sys.argv[2])
+
+   global data
+   with open("config.json") as json_data_file:
+      data = json.load(json_data_file)
+   
+   if len(sys.argv) > 1:
+      data = json.load(sys.argv[1])
 
    run(mode, "wallstreetbets", num_submissions)
 
@@ -280,7 +271,7 @@ if __name__ == "__main__":
    
    buildMessage += "\n\n[Source Code](https://github.com/obrienwritescode/RedditMentionedStocks)"
 
-   for toUser in data["SendLIst"]:
+   for toUser in data["SendList"]:
          reddit.redditor(toUser).message(str(get_date()) + " | Today's Top 25 Tickers", buildMessage)
 
        

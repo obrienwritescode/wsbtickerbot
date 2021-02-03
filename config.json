@@ -1,14 +1,15 @@
 {
     "login":{
-        "client_id":"",
-        "client_secret":"",
-        "username":"",
-        "password":"",
-        "user_agent":""        
+        "client_id":"bWKJa2laYffQFQ",
+        "client_secret":"xsU0iWX5lDNw_b3hJc5asxvRVe5sNg",
+        "username":"TheIrishNerdest",
+        "password":"#iMTTExW*14Q",
+        "user_agent":"local test"        
     },
-    "iex_apikey": "",
-    "SendLIst":[
+    "iex_apikey": "pk_2d17b727021642e990383e1a6eae46de",
+    "SendList":[
         "TheIrishNerdest",
-        "TheIrishNerdest"
+        "Kdt34s",
+        "jonesing4words"
     ]
 }
