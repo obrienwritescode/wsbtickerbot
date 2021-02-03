@@ -255,8 +255,10 @@ if __name__ == "__main__":
    with open("config.json") as json_data_file:
       data = json.load(json_data_file)
    
+   print(str(sys.argv[1]))
+
    if len(sys.argv) > 1:
-      data = json.load(sys.argv[1])
+      data = json.load(str(sys.argv[1]))
 
    run(mode, "wallstreetbets", num_submissions)
 
